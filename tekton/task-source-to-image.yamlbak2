@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: source-to-image
+spec:
+  inputs:
+    resources:
+      - name: git-source
+        type: git
+    params:
+      - name: pathToContext
+        description: The path to the build context, used by Kaniko - within the workspace
+        default: .
+      - name: pathToDockerFile
+        description: The path to the dockerfile to build (relative to the context)
+        default: Dockerfile
+      - name: imageUrl
+        default: wewang58/tekton
+  outputs:
+    resources:
+    - name: builtImage
+      type: image
+  steps:
+    - name: golang
+      image: golang:latest
+      workingDir: /workspace/git-source
+      command:
+        - go
+      args:
+        - build
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor
+      env:
+        - name: DOCKER_CONFIG
+          value: /builder/home/.docker/
+      command:
+        - /kaniko/executor
+      args:
+        - --dockerfile=$(inputs.params.pathToDockerFile)
+        - --context=$(inputs.params.pathToContext)
+        - --destination=$(inputs.params.imageUrl)
