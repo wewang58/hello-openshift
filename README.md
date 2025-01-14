@@ -1,4 +1,4 @@
-Hello, OpenShift!  
+Hello, OpenShift!      
 -----------------
 
 This example will serve an HTTP response of "Hello OpenShift!".
